@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rubrik Pemarkahan – Kos Bahan Projek Mekanikal</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px; line-height: 1.6;
+    background: #f0f2f5; color: #1f2328; min-height: 100vh;
+  }
+  header {
+    background: #1e3a5f; color: #fff;
+    padding: 18px 32px; display: flex; align-items: center; gap: 14px;
+  }
+  header .icon { font-size: 28px; }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header p { font-size: 12px; color: #a8c4e0; margin-top: 2px; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 24px 20px; }
+
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px 22px; margin-bottom: 18px; }
+  .section-title {
+    font-size: 13px; font-weight: 700; color: #1f2328;
+    margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  /* Maklumat */
+  .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .info-grid label { font-size: 11px; color: #57606a; font-weight: 600; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .info-grid input, .info-grid select {
+    width: 100%; border: 1px solid #d0d7de; border-radius: 5px;
+    padding: 6px 9px; font-size: 13px; font-family: inherit; color: #1f2328; outline: none;
+  }
+  .info-grid input:focus, .info-grid select:focus { border-color: #3b82d4; box-shadow: 0 0 0 2px rgba(59,130,212,.15); }
+
+  /* Rubrik Table */
+  .rubrik-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .rubrik-table th {
+    background: #1e3a5f; color: #fff; padding: 10px 12px;
+    text-align: center; font-size: 11px; font-weight: 600;
+    letter-spacing: .4px; border: 1px solid #15304f;
+  }
+  .rubrik-table th.left { text-align: left; }
+  .rubrik-table td { padding: 9px 12px; border: 1px solid #e5e7eb; vertical-align: top; }
+  .rubrik-table tr:nth-child(even) td { background: #f7f8fa; }
+  .rubrik-table td.kriteria { font-weight: 600; color: #1e3a5f; background: #eff6ff !important; min-width: 160px; }
+  .rubrik-table td.wajaran { text-align: center; font-weight: 700; color: #7c5cd8; }
+  .rubrik-table td.level { font-size: 12px; color: #57606a; line-height: 1.5; }
+  .rubrik-table td.markah { text-align: center; color: #57606a; font-weight: 600; font-size: 12px; }
+
+  /* Level colour headers */
+  .lv-4 { background: #15803d !important; color: #fff !important; }
+  .lv-3 { background: #3b82d4 !important; color: #fff !important; }
+  .lv-2 { background: #f97316 !important; color: #fff !important; }
+  .lv-1 { background: #dc2626 !important; color: #fff !important; }
+
+  /* Penilaian Bahan Table */
+  .penilaian-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .penilaian-table th {
+    background: #f7f8fa; padding: 9px 11px; border: 1px solid #e5e7eb;
+    font-size: 11px; font-weight: 600; color: #57606a;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .penilaian-table td { padding: 7px 10px; border: 1px solid #e5e7eb; vertical-align: middle; }
+  .penilaian-table tr:nth-child(even) td { background: #f7f8fa; }
+  .penilaian-table input[type="text"],
+  .penilaian-table input[type="number"],
+  .penilaian-table select {
+    width: 100%; border: 1px solid #d0d7de; border-radius: 5px;
+    padding: 4px 7px; font-size: 12px; font-family: inherit; color: #1f2328; outline: none;
+  }
+  .penilaian-table input:focus, .penilaian-table select:focus { border-color: #3b82d4; }
+
+  .score-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: 700; text-align: center;
+  }
+  .score-cemerlang { background: #dcfce7; color: #15803d; }
+  .score-baik      { background: #dbeafe; color: #1d4ed8; }
+  .score-memuaskan { background: #ffedd5; color: #c2410c; }
+  .score-lemah     { background: #fee2e2; color: #dc2626; }
+
+  /* Summary cards */
+  .sum-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .sum-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 9px; padding: 14px 16px; text-align: center; }
+  .sum-card .lbl { font-size: 10px; color: #57606a; text-transform: uppercase; letter-spacing: .7px; font-weight: 600; }
+  .sum-card .val { font-size: 24px; font-weight: 700; margin-top: 2px; }
+  .sum-card .sub { font-size: 11px; color: #57606a; margin-top: 2px; }
+
+  /* Grade bar */
+  .grade-bar-wrap { background: #f7f8fa; border-radius: 8px; padding: 16px 18px; margin-top: 14px; border: 1px solid #e5e7eb; }
+  .grade-bar-track { background: #e5e7eb; border-radius: 10px; height: 18px; overflow: hidden; margin: 10px 0 6px; }
+  .grade-bar-fill  { height: 100%; border-radius: 10px; transition: width .5s, background .3s; }
+  .grade-labels { display: flex; justify-content: space-between; font-size: 10px; color: #57606a; margin-top: 2px; }
+
+  .btn { padding: 8px 18px; border-radius: 7px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: background .15s; }
+  .btn-primary   { background: #1e3a5f; color: #fff; }
+  .btn-primary:hover { background: #15304f; }
+  .btn-secondary { background: #e5e7eb; color: #1f2328; }
+  .btn-secondary:hover { background: #d0d7de; }
+  .btn-add  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 5px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 600; margin-top: 10px; }
+  .btn-add:hover  { background: #dbeafe; }
+  .btn-danger { background: #fee2e2; color: #dc2626; padding: 3px 9px; font-size: 11px; border-radius: 5px; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+  .btn-danger:hover { background: #fca5a5; }
+
+  .action-row { display: flex; justify-content: center; gap: 14px; margin: 10px 0 28px; }
+
+  .info-box { padding: 10px 14px; border-radius: 7px; font-size: 12px; margin-bottom: 14px; border: 1px solid; }
+  .info-blue { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+
+  footer { text-align: center; font-size: 11px; color: #57606a; padding: 16px; border-top: 1px solid #e5e7eb; }
+
+  @media print {
+    body { background: #fff; }
+    .action-row, .btn-add, .btn-danger { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="icon">📋</div>
+  <div>
+    <h1>Rubrik Pemarkahan – Kos Bahan</h1>
+    <p>Penilaian perancangan, pemilihan dan pengurusan kos bahan projek mekanikal pelajar</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- MAKLUMAT -->
+  <div class="card">
+    <div class="section-title"><span class="dot" style="background:#3b82d4"></span>Maklumat Pelajar &amp; Projek</div>
+    <div class="info-grid">
+      <div><label>Nama Pelajar</label><input type="text" id="nama-pelajar" value="Ahmad Haziq bin Razif"></div>
+      <div><label>No. Matrik</label><input type="text" id="no-matrik" value="ME240012"></div>
+      <div><label>Nama Projek</label><input type="text" id="nama-projek" value="Reka Bentuk Lengan Robot"></div>
+      <div><label>Pensyarah Penilai</label><input type="text" id="penilai" value="Dr. Mohd Faizal bin Aziz"></div>
+      <div><label>Tarikh Penilaian</label><input type="date" id="tarikh" value="2025-01-28"></div>
+      <div><label>Semester</label><input type="text" id="semester" value="Sesi 2024/2025 – Sem 2"></div>
+    </div>
+  </div>
+
+  <!-- RUBRIK RUJUKAN -->
+  <div class="card">
+    <div class="section-title"><span class="dot" style="background:#7c5cd8"></span>📖 Rubrik Pemarkahan – Kriteria &amp; Tahap</div>
+    <div class="info-box info-blue">Rujukan pensyarah untuk menilai setiap kriteria. Pilih markah pada jadual penilaian di bawah.</div>
+    <table class="rubrik-table">
+      <thead>
+        <tr>
+          <th class="left" style="width:160px">Kriteria</th>
+          <th style="width:60px">Wajaran (%)</th>
+          <th class="lv-4">Cemerlang<br><span style="font-size:10px;font-weight:400">81–100 markah</span></th>
+          <th class="lv-3">Baik<br><span style="font-size:10px;font-weight:400">61–80 markah</span></th>
+          <th class="lv-2">Memuaskan<br><span style="font-size:10px;font-weight:400">41–60 markah</span></th>
+          <th class="lv-1">Lemah<br><span style="font-size:10px;font-weight:400">0–40 markah</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="kriteria">1. Ketepatan Senarai Bahan</td>
+          <td class="wajaran">20%</td>
+          <td class="level">Senarai lengkap, terperinci dan menepati keperluan projek sepenuhnya. Setiap bahan ada spesifikasi teknikal.</td>
+          <td class="level">Senarai hampir lengkap, kebanyakan bahan ada spesifikasi. Ada sedikit kekurangan kecil.</td>
+          <td class="level">Senarai tidak lengkap, beberapa bahan penting tertinggal atau spesifikasi tidak jelas.</td>
+          <td class="level">Senarai sangat tidak lengkap, banyak bahan penting tiada. Tiada spesifikasi teknikal.</td>
+        </tr>
+        <tr>
+          <td class="kriteria">2. Ketepatan Anggaran Harga</td>
+          <td class="wajaran">25%</td>
+          <td class="level">Harga berdasarkan sebutan harga terkini (≤5% sisihan). Sumber harga disertakan dan boleh disahkan.</td>
+          <td class="level">Harga hampir tepat (6–15% sisihan). Kebanyakan harga berdasarkan kajian pasaran.</td>
+          <td class="level">Harga agak jauh dari pasaran (16–30% sisihan). Harga sesetengah bahan tidak realistik.</td>
+          <td class="level">Harga tidak realistik (&gt;30% sisihan). Tiada kajian pasaran dilakukan.</td>
+        </tr>
+        <tr>
+          <td class="kriteria">3. Pemilihan Bahan yang Sesuai</td>
+          <td class="wajaran">20%</td>
+          <td class="level">Bahan dipilih optimum dari segi kos, kekuatan dan fungsi. Justifikasi teknikal menyeluruh.</td>
+          <td class="level">Bahan sesuai tetapi ada alternatif lebih baik/murah. Justifikasi ringkas disertakan.</td>
+          <td class="level">Bahan boleh berfungsi tetapi bukan pilihan terbaik dari segi kos. Kurang justifikasi.</td>
+          <td class="level">Bahan tidak sesuai atau terlalu mahal tanpa justifikasi. Pilihan tidak dipertimbangkan.</td>
+        </tr>
+        <tr>
+          <td class="kriteria">4. Kawalan Bajet</td>
+          <td class="wajaran">20%</td>
+          <td class="level">Kos bahan dalam had bajet ≤80%. Terdapat simpanan bajet yang dirancang untuk kontigensi.</td>
+          <td class="level">Kos bahan 81–95% daripada bajet. Perancangan bajet ada tetapi simpanan kecil.</td>
+          <td class="level">Kos bahan 96–110% daripada bajet. Sedikit melebihi dengan justifikasi.</td>
+          <td class="level">Kos bahan melebihi bajet &gt;110% tanpa justifikasi yang kukuh.</td>
+        </tr>
+        <tr>
+          <td class="kriteria">5. Dokumentasi &amp; Pembentangan</td>
+          <td class="wajaran">15%</td>
+          <td class="level">Dokumentasi kos lengkap, teratur, ada resit/sebutan harga. Pembentangan jelas dan yakin.</td>
+          <td class="level">Dokumentasi baik, ada beberapa sokongan. Pembentangan lancar dengan sedikit kekeliruan.</td>
+          <td class="level">Dokumentasi tidak lengkap, tiada sokongan harga. Pembentangan kurang yakin.</td>
+          <td class="level">Dokumentasi sangat lemah atau tiada. Tidak boleh menerangkan kos dengan jelas.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PENILAIAN MARKAH -->
+  <div class="card">
+    <div class="section-title"><span class="dot" style="background:#22c55e"></span>✍️ Borang Penilaian Markah</div>
+    <table class="penilaian-table">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Kriteria Penilaian</th>
+          <th style="width:70px;text-align:center">Wajaran (%)</th>
+          <th style="width:100px;text-align:center">Markah (0–100)</th>
+          <th style="width:90px;text-align:center">Markah Wajaran</th>
+          <th style="width:120px;text-align:center">Tahap</th>
+          <th style="width:200px">Komen Pensyarah</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-penilaian"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="text-align:right;font-weight:700;font-size:13px;padding:10px;background:#eff6ff;color:#1e3a5f">JUMLAH MARKAH WAJARAN:</td>
+          <td id="jumlah-wajaran" style="text-align:center;font-weight:700;font-size:16px;color:#1e3a5f;background:#eff6ff">0.00</td>
+          <td id="jumlah-tahap" style="text-align:center;background:#eff6ff"></td>
+          <td style="background:#eff6ff"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="sum-grid">
+    <div class="sum-card" style="border-top:4px solid #7c5cd8">
+      <div class="lbl">Jumlah Markah</div>
+      <div class="val" id="disp-markah" style="color:#7c5cd8">0.00</div>
+      <div class="sub">/ 100</div>
+    </div>
+    <div class="sum-card" style="border-top:4px solid #3b82d4">
+      <div class="lbl">Gred</div>
+      <div class="val" id="disp-gred" style="color:#3b82d4">—</div>
+      <div class="sub" id="disp-gred-sub">—</div>
+    </div>
+    <div class="sum-card" style="border-top:4px solid #22c55e">
+      <div class="lbl">Status</div>
+      <div class="val" id="disp-status" style="font-size:18px;color:#22c55e">—</div>
+      <div class="sub" id="disp-status-sub">—</div>
+    </div>
+    <div class="sum-card" style="border-top:4px solid #f97316">
+      <div class="lbl">Kriteria Terbaik</div>
+      <div class="val" id="disp-best" style="font-size:14px;color:#f97316;margin-top:6px">—</div>
+      <div class="sub" id="disp-best-score">—</div>
+    </div>
+  </div>
+
+  <!-- GRADE BAR -->
+  <div class="card">
+    <div class="section-title"><span class="dot" style="background:#1e3a5f"></span>📊 Visualisasi Markah</div>
+    <div class="grade-bar-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600">
+        <span>Markah Keseluruhan</span>
+        <span id="bar-pct-text" style="color:#1e3a5f">0 / 100</span>
+      </div>
+      <div class="grade-bar-track">
+        <div class="grade-bar-fill" id="grade-bar" style="width:0%;background:#e5e7eb"></div>
+      </div>
+      <div class="grade-labels">
+        <span>0</span><span>40</span><span>60</span><span>80</span><span>100</span>
+      </div>
+    </div>
+
+    <!-- Per-criteria bars -->
+    <div style="margin-top:18px" id="per-kriteria-bars"></div>
+  </div>
+
+  <!-- CATATAN -->
+  <div class="card">
+    <div class="section-title"><span class="dot" style="background:#57606a"></span>📝 Catatan &amp; Ulasan Keseluruhan Pensyarah</div>
+    <textarea style="width:100%;border:1px solid #d0d7de;border-radius:7px;padding:10px;font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none" placeholder="Tulis ulasan keseluruhan, cadangan penambahbaikan, atau arahan susulan di sini..."></textarea>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+    <button class="btn btn-secondary" onclick="resetMarkah()">🔄 Reset Markah</button>
+  </div>
+
+</div>
+
+<footer>Made with IBM Bob</footer>
+
+<script>
+var kriteria = [
+  { nama: 'Ketepatan Senarai Bahan',    wajaran: 20, markah: 85, komen: '' },
+  { nama: 'Ketepatan Anggaran Harga',   wajaran: 25, markah: 78, komen: '' },
+  { nama: 'Pemilihan Bahan yang Sesuai',wajaran: 20, markah: 82, komen: '' },
+  { nama: 'Kawalan Bajet',              wajaran: 20, markah: 74, komen: '' },
+  { nama: 'Dokumentasi & Pembentangan', wajaran: 15, markah: 80, komen: '' },
+];
+
+function getTahap(m) {
+  if (m >= 81) return { label: 'Cemerlang', cls: 'score-cemerlang' };
+  if (m >= 61) return { label: 'Baik',      cls: 'score-baik' };
+  if (m >= 41) return { label: 'Memuaskan', cls: 'score-memuaskan' };
+  return              { label: 'Lemah',     cls: 'score-lemah' };
+}
+
+function getGred(total) {
+  if (total >= 90) return { gred: 'A+', sub: 'Cemerlang', color: '#15803d' };
+  if (total >= 80) return { gred: 'A',  sub: 'Cemerlang', color: '#15803d' };
+  if (total >= 75) return { gred: 'A-', sub: 'Cemerlang', color: '#15803d' };
+  if (total >= 70) return { gred: 'B+', sub: 'Baik',      color: '#3b82d4' };
+  if (total >= 65) return { gred: 'B',  sub: 'Baik',      color: '#3b82d4' };
+  if (total >= 60) return { gred: 'B-', sub: 'Baik',      color: '#3b82d4' };
+  if (total >= 55) return { gred: 'C+', sub: 'Memuaskan', color: '#f97316' };
+  if (total >= 50) return { gred: 'C',  sub: 'Memuaskan', color: '#f97316' };
+  if (total >= 45) return { gred: 'C-', sub: 'Memuaskan', color: '#f97316' };
+  if (total >= 40) return { gred: 'D',  sub: 'Lulus',     color: '#f97316' };
+  return                   { gred: 'F',  sub: 'Gagal',     color: '#dc2626' };
+}
+
+function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function renderPenilaian() {
+  var tb = document.getElementById('tbody-penilaian');
+  tb.innerHTML = kriteria.map(function(r, i) {
+    var wm = (r.markah * r.wajaran / 100).toFixed(2);
+    var t  = getTahap(r.markah);
+    return '<tr>' +
+      '<td style="text-align:center;color:#57606a">' + (i+1) + '</td>' +
+      '<td style="font-weight:600;color:#1e3a5f">' + escH(r.nama) + '</td>' +
+      '<td style="text-align:center;font-weight:700;color:#7c5cd8">' + r.wajaran + '%</td>' +
+      '<td style="text-align:center"><input type="number" value="' + r.markah + '" min="0" max="100" step="1" style="width:70px;text-align:center" oninput="kriteria['+i+'].markah=Math.min(100,Math.max(0,+this.value||0));kira()"></td>' +
+      '<td style="text-align:center;font-weight:700;color:#1e3a5f" id="wm-'+i+'">' + wm + '</td>' +
+      '<td style="text-align:center"><span class="score-badge ' + t.cls + '" id="tahap-'+i+'">' + t.label + '</span></td>' +
+      '<td><input type="text" value="' + escH(r.komen) + '" placeholder="Komen..." oninput="kriteria['+i+'].komen=this.value" style="font-size:12px"></td>' +
+      '</tr>';
+  }).join('');
+}
+
+function kira() {
+  var total = kriteria.reduce(function(s, r) { return s + r.markah * r.wajaran / 100; }, 0);
+
+  // Update row cells
+  kriteria.forEach(function(r, i) {
+    var wm = (r.markah * r.wajaran / 100).toFixed(2);
+    var t  = getTahap(r.markah);
+    var wmEl = document.getElementById('wm-' + i);
+    var thEl = document.getElementById('tahap-' + i);
+    if (wmEl) wmEl.textContent = wm;
+    if (thEl) { thEl.textContent = t.label; thEl.className = 'score-badge ' + t.cls; }
+  });
+
+  document.getElementById('jumlah-wajaran').textContent = total.toFixed(2);
+
+  // Overall tahap
+  var tt = getTahap(total);
+  var jt = document.getElementById('jumlah-tahap');
+  jt.innerHTML = '<span class="score-badge ' + tt.cls + '">' + tt.label + '</span>';
+
+  // Summary cards
+  var g = getGred(total);
+  document.getElementById('disp-markah').textContent = total.toFixed(2);
+  document.getElementById('disp-gred').textContent   = g.gred;
+  document.getElementById('disp-gred').style.color   = g.color;
+  document.getElementById('disp-gred-sub').textContent = g.sub;
+  document.getElementById('disp-status').textContent = total >= 50 ? '✅ LULUS' : '❌ GAGAL';
+  document.getElementById('disp-status').style.color = total >= 50 ? '#15803d' : '#dc2626';
+  document.getElementById('disp-status-sub').textContent = total >= 50 ? 'Memenuhi syarat lulus' : 'Perlu penilaian semula';
+
+  // Best criteria
+  var best = kriteria.reduce(function(a, b) { return a.markah > b.markah ? a : b; });
+  document.getElementById('disp-best').textContent      = best.nama;
+  document.getElementById('disp-best-score').textContent = 'Markah: ' + best.markah + '/100';
+
+  // Grade bar
+  var barEl = document.getElementById('grade-bar');
+  barEl.style.width = total + '%';
+  if (total >= 80) barEl.style.background = '#22c55e';
+  else if (total >= 60) barEl.style.background = '#3b82d4';
+  else if (total >= 50) barEl.style.background = '#f97316';
+  else barEl.style.background = '#dc2626';
+  document.getElementById('bar-pct-text').textContent = total.toFixed(2) + ' / 100';
+
+  // Per-criteria bars
+  var colours = ['#3b82d4','#f97316','#22c55e','#7c5cd8','#1e3a5f'];
+  var html = kriteria.map(function(r, i) {
+    var wm = (r.markah * r.wajaran / 100);
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">' +
+      '<div style="width:200px;font-size:12px;color:#57606a;text-align:right;flex-shrink:0">' + r.nama + '</div>' +
+      '<div style="flex:1;background:#f0f2f5;border-radius:6px;height:20px;overflow:hidden">' +
+        '<div style="height:100%;width:' + r.markah + '%;background:' + colours[i] + ';border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:11px;font-weight:700;color:#fff;transition:width .5s">' +
+          (r.markah > 10 ? r.markah : '') +
+        '</div></div>' +
+      '<div style="width:80px;font-size:12px;font-weight:700;color:#1f2328;text-align:right">RM ' + wm.toFixed(1) + ' pts</div>' +
+      '</div>';
+  }).join('');
+  document.getElementById('per-kriteria-bars').innerHTML = html;
+}
+
+function resetMarkah() {
+  if (!confirm('Reset semua markah kepada 0?')) return;
+  kriteria.forEach(function(r) { r.markah = 0; r.komen = ''; });
+  renderPenilaian();
+  kira();
+}
+
+renderPenilaian();
+kira();
+</script>
+</body>
+</html>
