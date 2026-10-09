@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aplikasi Kos Projek Mekanikal</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; background: #f0f2f5; color: #1f2328; min-height: 100vh; }
+
+  /* ── Header ── */
+  .app-header {
+    background: #1e3a5f; color: #fff;
+    padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+    height: 60px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  }
+  .app-header .brand { display: flex; align-items: center; gap: 10px; }
+  .app-header .brand .icon { font-size: 24px; }
+  .app-header .brand h1 { font-size: 16px; font-weight: 700; }
+  .app-header .brand p  { font-size: 11px; color: #a8c4e0; }
+
+  /* ── Nav Tabs ── */
+  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tab {
+    padding: 8px 16px; border-radius: 7px; border: none;
+    cursor: pointer; font-size: 13px; font-weight: 600;
+    font-family: inherit; color: #a8c4e0; background: transparent;
+    transition: background .15s, color .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-tab:hover   { background: rgba(255,255,255,.1); color: #fff; }
+  .nav-tab.active  { background: #fff; color: #1e3a5f; }
+
+  /* ── Page ── */
+  .page { display: none; }
+  .page.active { display: block; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+
+  /* ── Cards ── */
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px 22px; margin-bottom: 18px; }
+  .card.accent-blue   { border-top: 4px solid #3b82d4; }
+  .card.accent-green  { border-top: 4px solid #22c55e; }
+  .card.accent-orange { border-top: 4px solid #f97316; }
+  .card.accent-purple { border-top: 4px solid #7c5cd8; }
+
+  .section-title { font-size: 13px; font-weight: 700; color: #1f2328; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  /* ── Summary Grid ── */
+  .sum4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+  .scard { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 18px; }
+  .scard-lbl { font-size: 10px; color: #57606a; text-transform: uppercase; letter-spacing: .8px; font-weight: 600; }
+  .scard-val { font-size: 24px; font-weight: 700; margin-top: 3px; }
+  .scard-sub { font-size: 11px; color: #57606a; margin-top: 2px; }
+  .prog { background: #e5e7eb; border-radius: 8px; height: 6px; margin-top: 8px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 8px; transition: width .4s; }
+
+  /* ── Two/Three Col ── */
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+  /* ── Forms ── */
+  .form-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  .form-grid label, .fg-label { font-size: 11px; color: #57606a; font-weight: 600; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .finput {
+    width: 100%; border: 1px solid #d0d7de; border-radius: 5px;
+    padding: 6px 9px; font-size: 13px; font-family: inherit; color: #1f2328; outline: none;
+  }
+  .finput:focus { border-color: #3b82d4; box-shadow: 0 0 0 2px rgba(59,130,212,.15); }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table th { background: #f7f8fa; padding: 9px 10px; text-align: left; font-weight: 600; color: #57606a; border: 1px solid #e5e7eb; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+  table td { padding: 6px 9px; border: 1px solid #e5e7eb; vertical-align: middle; }
+  table tr:nth-child(even) td { background: #f7f8fa; }
+  table input[type="number"], table input[type="text"] { width: 100%; border: 1px solid #d0d7de; border-radius: 5px; padding: 4px 7px; font-size: 12px; font-family: inherit; color: #1f2328; outline: none; background: #fff; }
+  table input:focus { border-color: #3b82d4; }
+  .tfoot-row td { font-weight: 700; font-size: 13px; padding: 10px; }
+
+  /* ── Info Boxes ── */
+  .info-box { padding: 10px 14px; border-radius: 7px; font-size: 12px; margin-bottom: 12px; border: 1px solid; }
+  .info-blue   { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+  .info-orange { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+  .info-green  { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+  .info-purple { background: #f5f3ff; border-color: #ddd6fe; color: #6d28d9; }
+
+  /* ── Badges ── */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-orange { background: #ffedd5; color: #c2410c; }
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .score-badge  { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .score-cemerlang { background: #dcfce7; color: #15803d; }
+  .score-baik      { background: #dbeafe; color: #1d4ed8; }
+  .score-memuaskan { background: #ffedd5; color: #c2410c; }
+  .score-lemah     { background: #fee2e2; color: #dc2626; }
+
+  /* ── Bar Chart ── */
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-label  { width: 110px; font-size: 12px; color: #57606a; text-align: right; flex-shrink: 0; }
+  .bar-track  { flex: 1; background: #f0f2f5; border-radius: 6px; height: 22px; overflow: hidden; }
+  .bar-fill   { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: 700; color: #fff; transition: width .5s; min-width: 2px; }
+  .bar-amount { width: 90px; font-size: 12px; font-weight: 700; text-align: right; flex-shrink: 0; }
+
+  /* ── Donut ── */
+  .donut-wrap { display: flex; align-items: center; gap: 24px; justify-content: center; padding: 8px 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .legend-dot  { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── Summary Table ── */
+  .sum-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sum-table th { background: #1e3a5f; color: #fff; padding: 10px 14px; text-align: left; font-size: 12px; }
+  .sum-table td { padding: 9px 14px; border-bottom: 1px solid #e5e7eb; }
+  .sum-table .subtotal-row td { background: #f7f8fa; font-weight: 600; color: #1e3a5f; }
+  .sum-table .total-row td    { background: #1e3a5f; color: #fff; font-weight: 700; font-size: 14px; }
+
+  /* ── Rubrik Table ── */
+  .rubrik-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .rubrik-table th { background: #1e3a5f; color: #fff; padding: 9px 11px; text-align: center; font-size: 11px; border: 1px solid #15304f; }
+  .rubrik-table th.left { text-align: left; }
+  .rubrik-table td { padding: 8px 11px; border: 1px solid #e5e7eb; vertical-align: top; }
+  .rubrik-table tr:nth-child(even) td { background: #f7f8fa; }
+  .rubrik-table td.kriteria { font-weight: 600; color: #1e3a5f; background: #eff6ff !important; min-width: 140px; }
+  .rubrik-table td.wajaran  { text-align: center; font-weight: 700; color: #7c5cd8; }
+  .lv-4 { background: #15803d !important; color: #fff !important; }
+  .lv-3 { background: #3b82d4 !important; color: #fff !important; }
+  .lv-2 { background: #f97316 !important; color: #fff !important; }
+  .lv-1 { background: #dc2626 !important; color: #fff !important; }
+
+  /* ── Grade Bar ── */
+  .grade-bar-wrap { background: #f7f8fa; border-radius: 8px; padding: 14px 16px; border: 1px solid #e5e7eb; }
+  .grade-bar-track { background: #e5e7eb; border-radius: 10px; height: 16px; overflow: hidden; margin: 8px 0 4px; }
+  .grade-bar-fill  { height: 100%; border-radius: 10px; transition: width .5s, background .3s; }
+
+  /* ── Buttons ── */
+  .btn { padding: 8px 18px; border-radius: 7px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: background .15s; }
+  .btn-primary   { background: #1e3a5f; color: #fff; }
+  .btn-primary:hover  { background: #15304f; }
+  .btn-secondary { background: #e5e7eb; color: #1f2328; }
+  .btn-secondary:hover{ background: #d0d7de; }
+  .btn-add    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 5px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 600; margin-top: 10px; }
+  .btn-add:hover { background: #dbeafe; }
+  .btn-danger { background: #fee2e2; color: #dc2626; padding: 3px 9px; font-size: 11px; border-radius: 5px; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+  .btn-danger:hover { background: #fca5a5; }
+  .action-row { display: flex; justify-content: center; gap: 14px; margin: 10px 0 24px; }
+
+  /* ── Home page ── */
+  .home-hero { background: linear-gradient(135deg, #1e3a5f 0%, #2563a8 100%); color: #fff; border-radius: 12px; padding: 32px 36px; margin-bottom: 22px; }
+  .home-hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .home-hero p  { color: #a8c4e0; font-size: 14px; max-width: 540px; }
+  .feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 22px; }
+  .feature-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; cursor: pointer; transition: box-shadow .15s, border-color .15s; text-align: center; }
+  .feature-card:hover { border-color: #3b82d4; box-shadow: 0 4px 14px rgba(59,130,212,.12); }
+  .feature-card .fc-icon { font-size: 32px; margin-bottom: 10px; }
+  .feature-card h3 { font-size: 14px; font-weight: 700; color: #1f2328; }
+  .feature-card p  { font-size: 12px; color: #57606a; margin-top: 4px; }
+
+  footer { text-align: center; font-size: 11px; color: #57606a; padding: 16px; border-top: 1px solid #e5e7eb; }
+
+  @media (max-width: 768px) {
+    .sum4 { grid-template-columns: repeat(2,1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .nav-tab span.tab-label { display: none; }
+  }
+  @media print { .app-header, .action-row, .btn-add, .btn-danger, .nav-tabs { display: none !important; } .page { display: block !important; } }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════ HEADER -->
+<div class="app-header">
+  <div class="brand">
+    <div class="icon">⚙️</div>
+    <div>
+      <h1>Aplikasi Kos Projek Mekanikal</h1>
+      <p>Pengiraan kos &amp; pemarkahan projek pelajar</p>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="tukarTab('home')"    id="tab-home">    🏠 <span class="tab-label">Utama</span></button>
+    <button class="nav-tab"        onclick="tukarTab('dashboard')" id="tab-dashboard">📊 <span class="tab-label">Dashboard Kos</span></button>
+    <button class="nav-tab"        onclick="tukarTab('rubrik')"  id="tab-rubrik">  📋 <span class="tab-label">Rubrik Pemarkahan</span></button>
+    <button class="nav-tab"        onclick="tukarTab('laporan')" id="tab-laporan"> 📄 <span class="tab-label">Laporan</span></button>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ HOME -->
+<div class="page active" id="page-home">
+  <div class="container">
+    <div class="home-hero">
+      <h2>⚙️ Sistem Pengurusan Kos Projek Mekanikal</h2>
+      <p>Platform lengkap untuk mengira kos bahan, peralatan dan masa kerja projek akhir pelajar kejuruteraan mekanikal. Termasuk rubrik pemarkahan dan laporan automatik.</p>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" style="background:#fff;color:#1e3a5f" onclick="tukarTab('dashboard')">📊 Mula Kira Kos</button>
+        <button class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="tukarTab('rubrik')">📋 Buka Rubrik</button>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card" onclick="tukarTab('dashboard')">
+        <div class="fc-icon">🔩</div>
+        <h3>Dashboard Kos</h3>
+        <p>Isi senarai bahan, peralatan dan masa kerja. Kos dikira automatik dengan carta visual.</p>
+      </div>
+      <div class="feature-card" onclick="tukarTab('rubrik')">
+        <div class="fc-icon">📋</div>
+        <h3>Rubrik Pemarkahan</h3>
+        <p>Nilai prestasi pelajar mengikut 5 kriteria. Markah wajaran dan gred dikira secara automatik.</p>
+      </div>
+      <div class="feature-card" onclick="tukarTab('laporan')">
+        <div class="fc-icon">📄</div>
+        <h3>Laporan Lengkap</h3>
+        <p>Ringkasan kos dan markah dalam satu laporan. Boleh dicetak atau simpan sebagai PDF.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><span class="dot" style="background:#3b82d4"></span>Maklumat Projek</div>
+      <div class="form-grid">
+        <div><label class="fg-label">Nama Projek</label><input class="finput" type="text" id="g-projek" value="Reka Bentuk Lengan Robot" oninput="syncMaklumat()"></div>
+        <div><label class="fg-label">Nama Pelajar</label><input class="finput" type="text" id="g-pelajar" value="Ahmad Haziq bin Razif" oninput="syncMaklumat()"></div>
+        <div><label class="fg-label">No. Matrik</label><input class="finput" type="text" id="g-matrik" value="ME240012" oninput="syncMaklumat()"></div>
+        <div><label class="fg-label">Pensyarah Penilai</label><input class="finput" type="text" id="g-penilai" value="Dr. Mohd Faizal bin Aziz" oninput="syncMaklumat()"></div>
+        <div><label class="fg-label">Semester / Sesi</label><input class="finput" type="text" id="g-sesi" value="Sesi 2024/2025 – Sem 2" oninput="syncMaklumat()"></div>
+        <div><label class="fg-label">Bajet Diluluskan (RM)</label><input class="finput" type="number" id="g-bajet" value="1500" min="0" step="50" oninput="kiraKos()"></div>
+        <div><label class="fg-label">Tarikh Penilaian</label><input class="finput" type="date" id="g-tarikh" value="2025-01-28"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ DASHBOARD KOS -->
+<div class="page" id="page-dashboard">
+  <div class="container">
+
+    <div class="sum4">
+      <div class="scard accent-blue">
+        <div class="scard-lbl">Kos Bahan</div>
+        <div class="scard-val" id="c-bahan" style="color:#3b82d4">RM 0.00</div>
+        <div class="scard-sub">Bahan mentah &amp; komponen</div>
+        <div class="prog"><div class="prog-fill" id="pg-bahan" style="background:#3b82d4;width:0%"></div></div>
+      </div>
+      <div class="scard accent-orange">
+        <div class="scard-lbl">Kos Peralatan</div>
+        <div class="scard-val" id="c-peralatan" style="color:#f97316">RM 0.00</div>
+        <div class="scard-sub">Sewa / penggunaan alatan</div>
+        <div class="prog"><div class="prog-fill" id="pg-peralatan" style="background:#f97316;width:0%"></div></div>
+      </div>
+      <div class="scard accent-green">
+        <div class="scard-lbl">Kos Masa</div>
+        <div class="scard-val" id="c-masa" style="color:#22c55e">RM 0.00</div>
+        <div class="scard-sub">Jam kerja &amp; upah</div>
+        <div class="prog"><div class="prog-fill" id="pg-masa" style="background:#22c55e;width:0%"></div></div>
+      </div>
+      <div class="scard accent-purple">
+        <div class="scard-lbl">JUMLAH KOS</div>
+        <div class="scard-val" id="c-total" style="color:#7c5cd8">RM 0.00</div>
+        <div class="scard-sub">Termasuk kontigensi 10%</div>
+        <div class="prog"><div class="prog-fill" id="pg-total" style="background:#7c5cd8;width:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- BAHAN -->
+      <div class="card">
+        <div class="section-title"><span class="dot" style="background:#3b82d4"></span>🔩 Kos Bahan Mentah &amp; Komponen</div>
+        <div class="info-box info-blue">Masukkan bahan, kuantiti dan harga seunit.</div>
+        <table>
+          <thead><tr><th style="width:28px">#</th><th>Nama Bahan</th><th style="width:60px">Qty</th><th style="width:55px">Unit</th><th style="width:80px">Harga/Unit</th><th style="width:75px">Jumlah (RM)</th><th style="width:32px"></th></tr></thead>
+          <tbody id="tb-bahan"></tbody>
+          <tfoot><tr><td colspan="5" class="tfoot-row" style="text-align:right;background:#eff6ff;color:#1e3a5f">SUBTOTAL:</td><td class="tfoot-row" id="sub-bahan" style="background:#eff6ff;color:#1e3a5f">RM 0.00</td><td style="background:#eff6ff"></td></tr></tfoot>
+        </table>
+        <button class="btn-add" onclick="tambah('bahan')">+ Tambah Bahan</button>
+      </div>
+      <!-- PERALATAN -->
+      <div class="card">
+        <div class="section-title"><span class="dot" style="background:#f97316"></span>🔧 Kos Peralatan &amp; Mesin</div>
+        <div class="info-box info-orange">Masukkan peralatan berdasarkan jam penggunaan.</div>
+        <table>
+          <thead><tr><th style="width:28px">#</th><th>Nama Peralatan</th><th style="width:70px">Jam Guna</th><th style="width:95px">Kadar/Jam (RM)</th><th style="width:75px">Jumlah (RM)</th><th style="width:32px"></th></tr></thead>
+          <tbody id="tb-peralatan"></tbody>
+          <tfoot><tr><td colspan="4" class="tfoot-row" style="text-align:right;background:#fff7ed;color:#c2410c">SUBTOTAL:</td><td class="tfoot-row" id="sub-peralatan" style="background:#fff7ed;color:#c2410c">RM 0.00</td><td style="background:#fff7ed"></td></tr></tfoot>
+        </table>
+        <button class="btn-add" onclick="tambah('peralatan')">+ Tambah Peralatan</button>
+      </div>
+    </div>
+
+    <!-- MASA -->
+    <div class="card">
+      <div class="section-title"><span class="dot" style="background:#22c55e"></span>⏱️ Kos Masa &amp; Tenaga Kerja</div>
+      <div class="info-box info-green">Rekodkan fasa kerja, bilangan pelajar, jam kerja dan kadar upah.</div>
+      <table>
+        <thead><tr><th style="width:28px">#</th><th>Fasa / Aktiviti</th><th style="width:75px">Bil. Pelajar</th><th style="width:70px">Jam Kerja</th><th style="width:95px">Kadar Upah/Jam</th><th style="width:75px">Jumlah (RM)</th><th style="width:32px"></th></tr></thead>
+        <tbody id="tb-masa"></tbody>
+        <tfoot><tr><td colspan="5" class="tfoot-row" style="text-align:right;background:#f0fdf4;color:#15803d">SUBTOTAL:</td><td class="tfoot-row" id="sub-masa" style="background:#f0fdf4;color:#15803d">RM 0.00</td><td style="background:#f0fdf4"></td></tr></tfoot>
+      </table>
+      <button class="btn-add" onclick="tambah('masa')">+ Tambah Aktiviti</button>
+    </div>
+
+    <div class="two-col">
+      <!-- CARTA -->
+      <div class="card">
+        <div class="section-title"><span class="dot" style="background:#7c5cd8"></span>📊 Carta Perbandingan Kos</div>
+        <div class="bar-row"><div class="bar-label">Bahan</div><div class="bar-track"><div class="bar-fill" id="br-bahan" style="background:#3b82d4;width:0%"></div></div><div class="bar-amount" id="ba-bahan" style="color:#3b82d4">RM 0</div></div>
+        <div class="bar-row"><div class="bar-label">Peralatan</div><div class="bar-track"><div class="bar-fill" id="br-peralatan" style="background:#f97316;width:0%"></div></div><div class="bar-amount" id="ba-peralatan" style="color:#f97316">RM 0</div></div>
+        <div class="bar-row"><div class="bar-label">Masa Kerja</div><div class="bar-track"><div class="bar-fill" id="br-masa" style="background:#22c55e;width:0%"></div></div><div class="bar-amount" id="ba-masa" style="color:#22c55e">RM 0</div></div>
+        <div style="height:1px;background:#e5e7eb;margin:16px 0"></div>
+        <div class="donut-wrap">
+          <svg width="130" height="130" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="54" fill="none" stroke="#e5e7eb" stroke-width="20"/>
+            <circle id="arc-b" cx="70" cy="70" r="54" fill="none" stroke="#3b82d4" stroke-width="20" stroke-dasharray="0 339.3" stroke-dashoffset="0" transform="rotate(-90 70 70)" style="transition:stroke-dasharray .5s"/>
+            <circle id="arc-p" cx="70" cy="70" r="54" fill="none" stroke="#f97316" stroke-width="20" stroke-dasharray="0 339.3" stroke-dashoffset="0" transform="rotate(-90 70 70)" style="transition:stroke-dasharray .5s"/>
+            <circle id="arc-m" cx="70" cy="70" r="54" fill="none" stroke="#22c55e" stroke-width="20" stroke-dasharray="0 339.3" stroke-dashoffset="0" transform="rotate(-90 70 70)" style="transition:stroke-dasharray .5s"/>
+            <text x="70" y="66" text-anchor="middle" font-size="9" fill="#57606a" font-family="system-ui">JUMLAH</text>
+            <text id="donut-total" x="70" y="80" text-anchor="middle" font-size="10" fill="#1f2328" font-weight="700" font-family="system-ui">RM 0</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#3b82d4"></div><span>Bahan — <strong id="pct-b">0%</strong></span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span>Peralatan — <strong id="pct-p">0%</strong></span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span>Masa — <strong id="pct-m">0%</strong></span></div>
+          </div>
+        </div>
+      </div>
+      <!-- RINGKASAN -->
+      <div class="card">
+        <div class="section-title"><span class="dot" style="background:#1e3a5f"></span>📋 Ringkasan &amp; Status Bajet</div>
+        <table class="sum-table">
+          <thead><tr><th>Kategori</th><th style="text-align:right">Jumlah (RM)</th><th style="text-align:right">%</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-blue">🔩 Bahan</span></td><td style="text-align:right;font-weight:600" id="st-b">0.00</td><td style="text-align:right;color:#57606a" id="sp-b">0%</td></tr>
+            <tr><td><span class="badge badge-orange">🔧 Peralatan</span></td><td style="text-align:right;font-weight:600" id="st-p">0.00</td><td style="text-align:right;color:#57606a" id="sp-p">0%</td></tr>
+            <tr><td><span class="badge badge-green">⏱️ Masa</span></td><td style="text-align:right;font-weight:600" id="st-m">0.00</td><td style="text-align:right;color:#57606a" id="sp-m">0%</td></tr>
+            <tr class="subtotal-row"><td>Subtotal</td><td style="text-align:right" id="st-sub">0.00</td><td style="text-align:right">100%</td></tr>
+            <tr><td style="color:#57606a">Kontigensi (10%)</td><td style="text-align:right;color:#57606a" id="st-k">0.00</td><td style="text-align:right;color:#57606a">—</td></tr>
+            <tr class="total-row"><td>JUMLAH KESELURUHAN</td><td style="text-align:right" id="st-tot">0.00</td><td style="text-align:right">—</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:18px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+            <span style="font-weight:600">Status Bajet</span>
+            <span id="bajet-txt" style="font-weight:700;color:#22c55e">—</span>
+          </div>
+          <div style="background:#e5e7eb;border-radius:10px;height:14px;overflow:hidden">
+            <div id="bajet-bar" style="height:100%;background:#22c55e;width:0%;border-radius:10px;transition:width .4s,background .3s"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#57606a;margin-top:4px">
+            <span id="bajet-used">RM 0 digunakan</span>
+            <span>Bajet: <strong id="bajet-had">RM 1,500</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak PDF</button>
+      <button class="btn btn-secondary" onclick="resetKos()">🔄 Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ RUBRIK -->
+<div class="page" id="page-rubrik">
+  <div class="container">
+
+    <div class="card">
+      <div class="section-title"><span class="dot" style="background:#7c5cd8"></span>📖 Rubrik Pemarkahan – Kriteria &amp; Tahap</div>
+      <div class="info-box info-purple">Rujukan pensyarah untuk menilai prestasi pelajar dalam perancangan kos bahan projek.</div>
+      <table class="rubrik-table">
+        <thead>
+          <tr>
+            <th class="left" style="width:150px">Kriteria</th>
+            <th style="width:55px">Wajaran</th>
+            <th class="lv-4">Cemerlang (81–100)</th>
+            <th class="lv-3">Baik (61–80)</th>
+            <th class="lv-2">Memuaskan (41–60)</th>
+            <th class="lv-1">Lemah (0–40)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="kriteria">1. Ketepatan Senarai Bahan</td><td class="wajaran">20%</td>
+            <td style="font-size:11px;color:#57606a">Senarai lengkap &amp; terperinci, semua bahan ada spesifikasi teknikal.</td>
+            <td style="font-size:11px;color:#57606a">Hampir lengkap, kebanyakan ada spesifikasi, kekurangan kecil.</td>
+            <td style="font-size:11px;color:#57606a">Tidak lengkap, beberapa bahan penting tertinggal.</td>
+            <td style="font-size:11px;color:#57606a">Sangat tidak lengkap, tiada spesifikasi teknikal.</td>
+          </tr>
+          <tr>
+            <td class="kriteria">2. Ketepatan Anggaran Harga</td><td class="wajaran">25%</td>
+            <td style="font-size:11px;color:#57606a">Harga tepat ≤5% sisihan, sumber disertakan.</td>
+            <td style="font-size:11px;color:#57606a">6–15% sisihan, kebanyakan berdasarkan kajian pasaran.</td>
+            <td style="font-size:11px;color:#57606a">16–30% sisihan, beberapa harga tidak realistik.</td>
+            <td style="font-size:11px;color:#57606a">&gt;30% sisihan, tiada kajian pasaran.</td>
+          </tr>
+          <tr>
+            <td class="kriteria">3. Pemilihan Bahan Sesuai</td><td class="wajaran">20%</td>
+            <td style="font-size:11px;color:#57606a">Bahan optimum dari segi kos &amp; fungsi, justifikasi menyeluruh.</td>
+            <td style="font-size:11px;color:#57606a">Bahan sesuai, ada alternatif lebih baik, justifikasi ringkas.</td>
+            <td style="font-size:11px;color:#57606a">Bahan boleh berfungsi tapi bukan pilihan terbaik.</td>
+            <td style="font-size:11px;color:#57606a">Bahan tidak sesuai atau terlalu mahal tanpa justifikasi.</td>
+          </tr>
+          <tr>
+            <td class="kriteria">4. Kawalan Bajet</td><td class="wajaran">20%</td>
+            <td style="font-size:11px;color:#57606a">Kos ≤80% bajet, ada simpanan kontigensi dirancang.</td>
+            <td style="font-size:11px;color:#57606a">81–95% bajet, simpanan kecil.</td>
+            <td style="font-size:11px;color:#57606a">96–110% bajet, sedikit melebihi.</td>
+            <td style="font-size:11px;color:#57606a">&gt;110% bajet tanpa justifikasi kukuh.</td>
+          </tr>
+          <tr>
+            <td class="kriteria">5. Dokumentasi &amp; Pembentangan</td><td class="wajaran">15%</td>
+            <td style="font-size:11px;color:#57606a">Dokumentasi lengkap, ada resit/sebutan, pembentangan jelas.</td>
+            <td style="font-size:11px;color:#57606a">Dokumentasi baik, pembentangan lancar.</td>
+            <td style="font-size:11px;color:#57606a">Dokumentasi tidak lengkap, kurang yakin.</td>
+            <td style="font-size:11px;color:#57606a">Dokumentasi sangat lemah, tidak boleh terangkan kos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- BORANG PENILAIAN -->
+    <div class="card">
+      <div class="section-title"><span class="dot" style="background:#22c55e"></span>✍️ Borang Penilaian Markah</div>
+      <table>
+        <thead><tr><th style="width:28px">#</th><th>Kriteria</th><th style="width:65px;text-align:center">Wajaran</th><th style="width:95px;text-align:center">Markah (0–100)</th><th style="width:85px;text-align:center">Markah Wajaran</th><th style="width:110px;text-align:center">Tahap</th><th>Komen</th></tr></thead>
+        <tbody id="tb-rubrik"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="tfoot-row" style="text-align:right;background:#eff6ff;color:#1e3a5f">JUMLAH MARKAH WAJARAN:</td>
+            <td id="r-jumlah" class="tfoot-row" style="text-align:center;font-size:16px;background:#eff6ff;color:#1e3a5f">0.00</td>
+            <td id="r-tahap" style="text-align:center;background:#eff6ff"></td>
+            <td style="background:#eff6ff"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- SUMMARY CARDS RUBRIK -->
+    <div class="sum4">
+      <div class="scard" style="border-top:4px solid #7c5cd8;text-align:center">
+        <div class="scard-lbl">Jumlah Markah</div>
+        <div class="scard-val" id="r-markah" style="color:#7c5cd8">0.00</div>
+        <div class="scard-sub">/ 100</div>
+      </div>
+      <div class="scard" style="border-top:4px solid #3b82d4;text-align:center">
+        <div class="scard-lbl">Gred</div>
+        <div class="scard-val" id="r-gred" style="color:#3b82d4">—</div>
+        <div class="scard-sub" id="r-gred-sub">—</div>
+      </div>
+      <div class="scard" style="border-top:4px solid #22c55e;text-align:center">
+        <div class="scard-lbl">Status</div>
+        <div class="scard-val" id="r-status" style="font-size:16px;color:#22c55e;margin-top:8px">—</div>
+        <div class="scard-sub" id="r-status-sub">—</div>
+      </div>
+      <div class="scard" style="border-top:4px solid #f97316;text-align:center">
+        <div class="scard-lbl">Kriteria Terbaik</div>
+        <div class="scard-val" id="r-best" style="font-size:13px;color:#f97316;margin-top:6px">—</div>
+        <div class="scard-sub" id="r-best-sc">—</div>
+      </div>
+    </div>
+
+    <!-- GRADE BAR -->
+    <div class="card">
+      <div class="section-title"><span class="dot" style="background:#1e3a5f"></span>📊 Visualisasi Markah</div>
+      <div class="grade-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600">
+          <span>Markah Keseluruhan</span>
+          <span id="grade-txt" style="color:#1e3a5f">0 / 100</span>
+        </div>
+        <div class="grade-bar-track"><div class="grade-bar-fill" id="grade-bar" style="width:0%;background:#e5e7eb"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#57606a"><span>0</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
+      </div>
+      <div style="margin-top:16px" id="r-bars"></div>
+      <div style="margin-top:16px">
+        <div class="section-title" style="margin-bottom:8px"><span class="dot" style="background:#57606a"></span>Catatan Pensyarah</div>
+        <textarea style="width:100%;border:1px solid #d0d7de;border-radius:7px;padding:10px;font-size:13px;font-family:inherit;resize:vertical;min-height:70px;outline:none" placeholder="Ulasan keseluruhan, cadangan penambahbaikan..."></textarea>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak PDF</button>
+      <button class="btn btn-secondary" onclick="resetRubrik()">🔄 Reset Markah</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ LAPORAN -->
+<div class="page" id="page-laporan">
+  <div class="container">
+    <div class="card" style="border-top:4px solid #1e3a5f">
+      <div style="text-align:center;padding:10px 0 20px">
+        <div style="font-size:28px;margin-bottom:8px">⚙️</div>
+        <h2 style="font-size:18px;font-weight:700;color:#1e3a5f">LAPORAN KOS PROJEK MEKANIKAL</h2>
+        <p style="font-size:12px;color:#57606a;margin-top:4px" id="lap-header">—</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <div style="background:#f7f8fa;border-radius:8px;padding:14px">
+          <div style="font-size:11px;color:#57606a;font-weight:600;margin-bottom:8px;text-transform:uppercase">Maklumat Pelajar</div>
+          <table style="font-size:13px;border:none"><tbody id="lap-maklumat"></tbody></table>
+        </div>
+        <div style="background:#f7f8fa;border-radius:8px;padding:14px">
+          <div style="font-size:11px;color:#57606a;font-weight:600;margin-bottom:8px;text-transform:uppercase">Ringkasan Kos</div>
+          <table style="font-size:13px;border:none"><tbody id="lap-kos-sum"></tbody></table>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e5e7eb">Butiran Kos Bahan</div>
+      <table style="margin-bottom:16px">
+        <thead><tr><th>#</th><th>Nama Bahan</th><th>Qty</th><th>Unit</th><th style="text-align:right">Harga/Unit (RM)</th><th style="text-align:right">Jumlah (RM)</th></tr></thead>
+        <tbody id="lap-bahan"></tbody>
+      </table>
+
+      <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e5e7eb">Butiran Kos Peralatan</div>
+      <table style="margin-bottom:16px">
+        <thead><tr><th>#</th><th>Nama Peralatan</th><th style="text-align:right">Jam Guna</th><th style="text-align:right">Kadar/Jam (RM)</th><th style="text-align:right">Jumlah (RM)</th></tr></thead>
+        <tbody id="lap-peralatan"></tbody>
+      </table>
+
+      <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e5e7eb">Butiran Kos Masa</div>
+      <table style="margin-bottom:16px">
+        <thead><tr><th>#</th><th>Fasa / Aktiviti</th><th style="text-align:right">Bil. Pelajar</th><th style="text-align:right">Jam Kerja</th><th style="text-align:right">Kadar/Jam (RM)</th><th style="text-align:right">Jumlah (RM)</th></tr></thead>
+        <tbody id="lap-masa"></tbody>
+      </table>
+
+      <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e5e7eb">Pemarkahan</div>
+      <table style="margin-bottom:16px">
+        <thead><tr><th>#</th><th>Kriteria</th><th style="text-align:center">Wajaran</th><th style="text-align:center">Markah</th><th style="text-align:center">Markah Wajaran</th><th style="text-align:center">Tahap</th></tr></thead>
+        <tbody id="lap-rubrik"></tbody>
+        <tfoot><tr><td colspan="4" style="text-align:right;font-weight:700;padding:9px;background:#eff6ff;color:#1e3a5f">JUMLAH:</td><td id="lap-r-total" style="text-align:center;font-weight:700;background:#eff6ff;color:#1e3a5f">0.00</td><td id="lap-r-gred" style="text-align:center;background:#eff6ff"></td></tr></tfoot>
+      </table>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="janaLaporan();window.print()">🖨️ Cetak / Simpan PDF</button>
+      <button class="btn btn-secondary" onclick="janaLaporan()">🔄 Kemaskini Laporan</button>
+    </div>
+  </div>
+</div>
+
+<footer>Made with IBM Bob</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════════ DATA
+var bahan = [
+  { nama:'Aluminium Hollow Section (50×50×3mm)', qty:4, unit:'meter',  harga:28.00 },
+  { nama:'Plat Aluminium 3mm',                   qty:2, unit:'keping', harga:45.00 },
+  { nama:'Motor Servo MG996R',                   qty:3, unit:'unit',   harga:35.00 },
+  { nama:'Skru & Nat M4 (pek)',                  qty:2, unit:'pek',    harga:8.50  },
+  { nama:'Kabel & Penyambung Elektrik',          qty:1, unit:'set',    harga:22.00 },
+];
+var peralatan = [
+  { nama:'Mesin Lathe CNC',           jam:4, kadar:25.00 },
+  { nama:'Mesin Las MIG Welding',     jam:3, kadar:18.00 },
+  { nama:'Pengisar Meja (Milling)',   jam:2, kadar:12.00 },
+];
+var masa = [
+  { fasa:'Rekabentuk & Pelan Teknikal', pelajar:2, jam:8,  kadar:10.00 },
+  { fasa:'Pembuatan Rangka',            pelajar:2, jam:12, kadar:10.00 },
+  { fasa:'Pemasangan & Pengkabelan',    pelajar:2, jam:6,  kadar:10.00 },
+  { fasa:'Ujian & Penyelarasan',        pelajar:1, jam:4,  kadar:10.00 },
+];
+var rubrik = [
+  { nama:'Ketepatan Senarai Bahan',     wajaran:20, markah:85, komen:'' },
+  { nama:'Ketepatan Anggaran Harga',    wajaran:25, markah:78, komen:'' },
+  { nama:'Pemilihan Bahan yang Sesuai', wajaran:20, markah:82, komen:'' },
+  { nama:'Kawalan Bajet',               wajaran:20, markah:74, komen:'' },
+  { nama:'Dokumentasi & Pembentangan',  wajaran:15, markah:80, komen:'' },
+];
+
+// ══════════════════════════════════════════════════════════════════ HELPERS
+function f2(v) { return parseFloat(v).toFixed(2); }
+function rm(v) { return 'RM ' + f2(v); }
+function pct(a,t){ return t>0 ? a/t*100 : 0; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function el(id) { return document.getElementById(id); }
+function getTahap(m){ if(m>=81)return{l:'Cemerlang',c:'score-cemerlang'}; if(m>=61)return{l:'Baik',c:'score-baik'}; if(m>=41)return{l:'Memuaskan',c:'score-memuaskan'}; return{l:'Lemah',c:'score-lemah'}; }
+function getGred(t){ if(t>=90)return{g:'A+',s:'Cemerlang',col:'#15803d'}; if(t>=80)return{g:'A',s:'Cemerlang',col:'#15803d'}; if(t>=75)return{g:'A-',s:'Cemerlang',col:'#15803d'}; if(t>=70)return{g:'B+',s:'Baik',col:'#3b82d4'}; if(t>=65)return{g:'B',s:'Baik',col:'#3b82d4'}; if(t>=60)return{g:'B-',s:'Baik',col:'#3b82d4'}; if(t>=55)return{g:'C+',s:'Memuaskan',col:'#f97316'}; if(t>=50)return{g:'C',s:'Memuaskan',col:'#f97316'}; if(t>=45)return{g:'C-',s:'Memuaskan',col:'#f97316'}; if(t>=40)return{g:'D',s:'Lulus',col:'#f97316'}; return{g:'F',s:'Gagal',col:'#dc2626'}; }
+
+// ══════════════════════════════════════════════════════════════════ NAV
+function tukarTab(tab) {
+  ['home','dashboard','rubrik','laporan'].forEach(function(t){
+    el('page-'+t).classList.toggle('active', t===tab);
+    el('tab-'+t).classList.toggle('active', t===tab);
+  });
+  if(tab==='laporan') janaLaporan();
+}
+
+// ══════════════════════════════════════════════════════════════════ SYNC
+function syncMaklumat(){}
+
+// ══════════════════════════════════════════════════════════════════ RENDER KOS
+function renderBahan(){
+  el('tb-bahan').innerHTML = bahan.map(function(r,i){
+    return '<tr>'+
+      '<td style="text-align:center;color:#57606a">'+(i+1)+'</td>'+
+      '<td><input type="text" value="'+esc(r.nama)+'" oninput="bahan['+i+'].nama=this.value"></td>'+
+      '<td><input type="number" value="'+r.qty+'" min="0" step="0.1" oninput="bahan['+i+'].qty=+this.value||0;kiraKos()"></td>'+
+      '<td><input type="text" value="'+esc(r.unit)+'" oninput="bahan['+i+'].unit=this.value"></td>'+
+      '<td><input type="number" value="'+r.harga+'" min="0" step="0.5" oninput="bahan['+i+'].harga=+this.value||0;kiraKos()"></td>'+
+      '<td style="text-align:right;font-weight:700;color:#1e3a5f" id="btot-'+i+'">'+f2(r.qty*r.harga)+'</td>'+
+      '<td><button class="btn-danger" onclick="hapus(\'bahan\','+i+')">✕</button></td>'+
+      '</tr>';
+  }).join('');
+}
+function renderPeralatan(){
+  el('tb-peralatan').innerHTML = peralatan.map(function(r,i){
+    return '<tr>'+
+      '<td style="text-align:center;color:#57606a">'+(i+1)+'</td>'+
+      '<td><input type="text" value="'+esc(r.nama)+'" oninput="peralatan['+i+'].nama=this.value"></td>'+
+      '<td><input type="number" value="'+r.jam+'" min="0" step="0.5" oninput="peralatan['+i+'].jam=+this.value||0;kiraKos()"></td>'+
+      '<td><input type="number" value="'+r.kadar+'" min="0" step="0.5" oninput="peralatan['+i+'].kadar=+this.value||0;kiraKos()"></td>'+
+      '<td style="text-align:right;font-weight:700;color:#c2410c" id="ptot-'+i+'">'+f2(r.jam*r.kadar)+'</td>'+
+      '<td><button class="btn-danger" onclick="hapus(\'peralatan\','+i+')">✕</button></td>'+
+      '</tr>';
+  }).join('');
+}
+function renderMasa(){
+  el('tb-masa').innerHTML = masa.map(function(r,i){
+    return '<tr>'+
+      '<td style="text-align:center;color:#57606a">'+(i+1)+'</td>'+
+      '<td><input type="text" value="'+esc(r.fasa)+'" oninput="masa['+i+'].fasa=this.value"></td>'+
+      '<td><input type="number" value="'+r.pelajar+'" min="1" step="1" oninput="masa['+i+'].pelajar=+this.value||1;kiraKos()"></td>'+
+      '<td><input type="number" value="'+r.jam+'" min="0" step="0.5" oninput="masa['+i+'].jam=+this.value||0;kiraKos()"></td>'+
+      '<td><input type="number" value="'+r.kadar+'" min="0" step="0.5" oninput="masa['+i+'].kadar=+this.value||0;kiraKos()"></td>'+
+      '<td style="text-align:right;font-weight:700;color:#15803d" id="mtot-'+i+'">'+f2(r.pelajar*r.jam*r.kadar)+'</td>'+
+      '<td><button class="btn-danger" onclick="hapus(\'masa\','+i+')">✕</button></td>'+
+      '</tr>';
+  }).join('');
+}
+function renderRubrik(){
+  el('tb-rubrik').innerHTML = rubrik.map(function(r,i){
+    var wm=(r.markah*r.wajaran/100).toFixed(2);
+    var t=getTahap(r.markah);
+    return '<tr>'+
+      '<td style="text-align:center;color:#57606a">'+(i+1)+'</td>'+
+      '<td style="font-weight:600;color:#1e3a5f">'+esc(r.nama)+'</td>'+
+      '<td style="text-align:center;font-weight:700;color:#7c5cd8">'+r.wajaran+'%</td>'+
+      '<td style="text-align:center"><input type="number" value="'+r.markah+'" min="0" max="100" step="1" style="width:65px;text-align:center" oninput="rubrik['+i+'].markah=Math.min(100,Math.max(0,+this.value||0));kiraRubrik()"></td>'+
+      '<td style="text-align:center;font-weight:700;color:#1e3a5f" id="rwm-'+i+'">'+wm+'</td>'+
+      '<td style="text-align:center"><span class="score-badge '+t.c+'" id="rtahap-'+i+'">'+t.l+'</span></td>'+
+      '<td><input type="text" value="'+esc(r.komen)+'" placeholder="Komen..." oninput="rubrik['+i+'].komen=this.value" style="font-size:12px"></td>'+
+      '</tr>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════ ADD/REMOVE
+function tambah(jenis){
+  if(jenis==='bahan'){bahan.push({nama:'Bahan Baru',qty:1,unit:'unit',harga:0});renderBahan();}
+  else if(jenis==='peralatan'){peralatan.push({nama:'Peralatan Baru',jam:1,kadar:0});renderPeralatan();}
+  else{masa.push({fasa:'Aktiviti Baru',pelajar:1,jam:1,kadar:0});renderMasa();}
+  kiraKos();
+}
+function hapus(jenis,i){
+  if(jenis==='bahan') bahan.splice(i,1);
+  else if(jenis==='peralatan') peralatan.splice(i,1);
+  else masa.splice(i,1);
+  renderBahan();renderPeralatan();renderMasa();kiraKos();
+}
+function resetKos(){ if(!confirm('Reset semua data kos?')) return; bahan=[{nama:'',qty:1,unit:'unit',harga:0}]; peralatan=[{nama:'',jam:1,kadar:0}]; masa=[{fasa:'',pelajar:1,jam:1,kadar:0}]; renderBahan();renderPeralatan();renderMasa();kiraKos(); }
+function resetRubrik(){ if(!confirm('Reset semua markah?')) return; rubrik.forEach(function(r){r.markah=0;r.komen='';}); renderRubrik();kiraRubrik(); }
+
+// ══════════════════════════════════════════════════════════════════ KIRA KOS
+function kiraKos(){
+  var tB=bahan.reduce(function(s,r){return s+r.qty*r.harga;},0);
+  var tP=peralatan.reduce(function(s,r){return s+r.jam*r.kadar;},0);
+  var tM=masa.reduce(function(s,r){return s+r.pelajar*r.jam*r.kadar;},0);
+  var sub=tB+tP+tM; var k=sub*0.1; var tot=sub+k;
+
+  el('c-bahan').textContent=rm(tB); el('c-peralatan').textContent=rm(tP); el('c-masa').textContent=rm(tM); el('c-total').textContent=rm(tot);
+  el('sub-bahan').textContent=rm(tB); el('sub-peralatan').textContent=rm(tP); el('sub-masa').textContent=rm(tM);
+  el('st-b').textContent=f2(tB); el('st-p').textContent=f2(tP); el('st-m').textContent=f2(tM);
+  el('st-sub').textContent=f2(sub); el('st-k').textContent=f2(k); el('st-tot').textContent=f2(tot);
+
+  var pB=pct(tB,sub),pP=pct(tP,sub),pMa=pct(tM,sub);
+  el('pct-b').textContent=pB.toFixed(1)+'%'; el('pct-p').textContent=pP.toFixed(1)+'%'; el('pct-m').textContent=pMa.toFixed(1)+'%';
+  el('sp-b').textContent=pB.toFixed(1)+'%'; el('sp-p').textContent=pP.toFixed(1)+'%'; el('sp-m').textContent=pMa.toFixed(1)+'%';
+  el('pg-bahan').style.width=pB+'%'; el('pg-peralatan').style.width=pP+'%'; el('pg-masa').style.width=pMa+'%';
+
+  function setBar(sfx,p,amt){ el('br-'+sfx).style.width=p+'%'; el('br-'+sfx).textContent=p>5?p.toFixed(1)+'%':''; el('ba-'+sfx).textContent=rm(amt); }
+  setBar('bahan',pB,tB); setBar('peralatan',pP,tP); setBar('masa',pMa,tM);
+
+  var C=2*Math.PI*54;
+  function setArc(id,dash,off){ var e=el(id); e.setAttribute('stroke-dasharray',dash+' '+(C-dash)); e.setAttribute('stroke-dashoffset',off); }
+  var dB=pB/100*C,dP=pP/100*C,dM=pMa/100*C;
+  setArc('arc-b',dB,0); setArc('arc-p',dP,-dB); setArc('arc-m',dM,-(dB+dP));
+  el('donut-total').textContent=rm(tot);
+
+  var bajet=parseFloat(el('g-bajet').value)||0;
+  el('bajet-had').textContent=bajet>0?rm(bajet):'Tiada'; el('bajet-used').textContent=rm(tot)+' digunakan';
+  var pb2=bajet>0?Math.min(tot/bajet*100,100):0;
+  var bb=el('bajet-bar'),bt=el('bajet-txt');
+  bb.style.width=pb2+'%';
+  if(!bajet){bb.style.background='#e5e7eb';bt.style.color='#57606a';bt.textContent='Tiada Bajet';}
+  else if(tot<=bajet*.80){bb.style.background='#22c55e';bt.style.color='#15803d';bt.textContent='✅ Dalam Bajet ('+pb2.toFixed(0)+'%)';}
+  else if(tot<=bajet){bb.style.background='#f97316';bt.style.color='#c2410c';bt.textContent='⚠️ Hampir Had ('+pb2.toFixed(0)+'%)';}
+  else{bb.style.background='#dc2626';bt.style.color='#dc2626';bt.textContent='🚨 Melebihi Bajet!';}
+
+  bahan.forEach(function(r,i){var e=el('btot-'+i);if(e)e.textContent=f2(r.qty*r.harga);});
+  peralatan.forEach(function(r,i){var e=el('ptot-'+i);if(e)e.textContent=f2(r.jam*r.kadar);});
+  masa.forEach(function(r,i){var e=el('mtot-'+i);if(e)e.textContent=f2(r.pelajar*r.jam*r.kadar);});
+}
+
+// ══════════════════════════════════════════════════════════════════ KIRA RUBRIK
+function kiraRubrik(){
+  var total=rubrik.reduce(function(s,r){return s+r.markah*r.wajaran/100;},0);
+  rubrik.forEach(function(r,i){
+    var wm=(r.markah*r.wajaran/100).toFixed(2);
+    var t=getTahap(r.markah);
+    var we=el('rwm-'+i),te=el('rtahap-'+i);
+    if(we)we.textContent=wm;
+    if(te){te.textContent=t.l;te.className='score-badge '+t.c;}
+  });
+  el('r-jumlah').textContent=total.toFixed(2);
+  var tt=getTahap(total);
+  el('r-tahap').innerHTML='<span class="score-badge '+tt.c+'">'+tt.l+'</span>';
+
+  var g=getGred(total);
+  el('r-markah').textContent=total.toFixed(2);
+  el('r-gred').textContent=g.g; el('r-gred').style.color=g.col; el('r-gred-sub').textContent=g.s;
+  el('r-status').textContent=total>=50?'✅ LULUS':'❌ GAGAL';
+  el('r-status').style.color=total>=50?'#15803d':'#dc2626';
+  el('r-status-sub').textContent=total>=50?'Memenuhi syarat lulus':'Perlu penilaian semula';
+
+  var best=rubrik.reduce(function(a,b){return a.markah>b.markah?a:b;});
+  el('r-best').textContent=best.nama; el('r-best-sc').textContent='Markah: '+best.markah+'/100';
+
+  var gb=el('grade-bar');
+  gb.style.width=total+'%';
+  if(total>=80)gb.style.background='#22c55e';
+  else if(total>=60)gb.style.background='#3b82d4';
+  else if(total>=50)gb.style.background='#f97316';
+  else gb.style.background='#dc2626';
+  el('grade-txt').textContent=total.toFixed(2)+' / 100';
+
+  var cols=['#3b82d4','#f97316','#22c55e','#7c5cd8','#1e3a5f'];
+  el('r-bars').innerHTML=rubrik.map(function(r,i){
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+
+      '<div style="width:190px;font-size:11px;color:#57606a;text-align:right;flex-shrink:0">'+esc(r.nama)+'</div>'+
+      '<div style="flex:1;background:#f0f2f5;border-radius:5px;height:18px;overflow:hidden">'+
+        '<div style="height:100%;width:'+r.markah+'%;background:'+cols[i]+';border-radius:5px;transition:width .5s;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;font-size:10px;font-weight:700;color:#fff">'+
+          (r.markah>10?r.markah:'')+
+        '</div></div>'+
+      '<div style="width:70px;font-size:11px;font-weight:700;text-align:right">'+r.markah+'/100</div>'+
+      '</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════ LAPORAN
+function janaLaporan(){
+  var nama=el('g-pelajar').value||'—', projek=el('g-projek').value||'—', matrik=el('g-matrik').value||'—';
+  var penilai=el('g-penilai').value||'—', sesi=el('g-sesi').value||'—', tarikh=el('g-tarikh').value||'—';
+  el('lap-header').textContent=projek+' | '+nama+' | '+sesi;
+
+  el('lap-maklumat').innerHTML=[
+    ['Nama Pelajar',nama],['No. Matrik',matrik],['Nama Projek',projek],
+    ['Pensyarah',penilai],['Sesi',sesi],['Tarikh',tarikh]
+  ].map(function(r){return '<tr><td style="color:#57606a;padding:3px 6px 3px 0;font-size:12px">'+r[0]+'</td><td style="font-weight:600;padding:3px 0;font-size:12px">'+esc(r[1])+'</td></tr>';}).join('');
+
+  var tB=bahan.reduce(function(s,r){return s+r.qty*r.harga;},0);
+  var tP=peralatan.reduce(function(s,r){return s+r.jam*r.kadar;},0);
+  var tM=masa.reduce(function(s,r){return s+r.pelajar*r.jam*r.kadar;},0);
+  var sub=tB+tP+tM, k=sub*0.1, tot=sub+k;
+  el('lap-kos-sum').innerHTML=[
+    ['Kos Bahan',rm(tB)],['Kos Peralatan',rm(tP)],['Kos Masa',rm(tM)],
+    ['Kontigensi (10%)',rm(k)],['JUMLAH',rm(tot)]
+  ].map(function(r,i){return '<tr><td style="color:#57606a;padding:3px 6px 3px 0;font-size:12px">'+r[0]+'</td><td style="font-weight:'+(i===4?'700':'600')+';padding:3px 0;font-size:'+(i===4?'14':'12')+'px;color:'+(i===4?'#1e3a5f':'inherit')+'">'+r[1]+'</td></tr>';}).join('');
+
+  el('lap-bahan').innerHTML=bahan.map(function(r,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(r.nama)+'</td><td>'+r.qty+'</td><td>'+esc(r.unit)+'</td><td style="text-align:right">'+f2(r.harga)+'</td><td style="text-align:right;font-weight:600">'+f2(r.qty*r.harga)+'</td></tr>';}).join('');
+  el('lap-peralatan').innerHTML=peralatan.map(function(r,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(r.nama)+'</td><td style="text-align:right">'+r.jam+'</td><td style="text-align:right">'+f2(r.kadar)+'</td><td style="text-align:right;font-weight:600">'+f2(r.jam*r.kadar)+'</td></tr>';}).join('');
+  el('lap-masa').innerHTML=masa.map(function(r,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(r.fasa)+'</td><td style="text-align:right">'+r.pelajar+'</td><td style="text-align:right">'+r.jam+'</td><td style="text-align:right">'+f2(r.kadar)+'</td><td style="text-align:right;font-weight:600">'+f2(r.pelajar*r.jam*r.kadar)+'</td></tr>';}).join('');
+
+  var rTotal=rubrik.reduce(function(s,r){return s+r.markah*r.wajaran/100;},0);
+  var g=getGred(rTotal);
+  el('lap-rubrik').innerHTML=rubrik.map(function(r,i){
+    var wm=(r.markah*r.wajaran/100).toFixed(2);
+    var t=getTahap(r.markah);
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.nama)+'</td><td style="text-align:center">'+r.wajaran+'%</td><td style="text-align:center">'+r.markah+'</td><td style="text-align:center;font-weight:600">'+wm+'</td><td style="text-align:center"><span class="score-badge '+t.c+'">'+t.l+'</span></td></tr>';
+  }).join('');
+  el('lap-r-total').textContent=rTotal.toFixed(2);
+  el('lap-r-gred').innerHTML='<span class="score-badge" style="background:'+g.col+'20;color:'+g.col+'">'+g.g+' — '+g.s+'</span>';
+}
+
+// ══════════════════════════════════════════════════════════════════ INIT
+renderBahan(); renderPeralatan(); renderMasa(); renderRubrik();
+kiraKos(); kiraRubrik();
+</script>
+</body>
+</html>
